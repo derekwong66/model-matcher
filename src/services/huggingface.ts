@@ -5,11 +5,10 @@ import type {
   ModelScenario,
 } from "../types/index.ts";
 
-// Dev server proxies /api/hf → https://huggingface.co/api
-// Production uses direct URL
-const HF_API_BASE = import.meta.env.DEV
-  ? "/api/hf/models"
-  : "https://huggingface.co/api/models";
+// /api/hf is proxied to https://huggingface.co/api
+// - Dev: via vite.config.ts server.proxy
+// - Prod: via vercel.json rewrites
+const HF_API_BASE = "/api/hf/models";
 const TIMEOUT_MS = 8000;
 
 interface HFModel {

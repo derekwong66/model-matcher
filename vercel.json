@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/hf/:match*",
+      "destination": "https://huggingface.co/api/:match*"
+    }
+  ]
+}
