@@ -1,0 +1,126 @@
+.model-card {
+  background: #1d1d1f;
+  border-radius: 18px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.model-card:hover {
+  transform: scale(1.02);
+}
+
+.model-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.model-card__name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f5f5f7;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.model-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.model-card__family {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(41, 151, 255, 0.12);
+  color: #2997ff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.model-card__source {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #86868b;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.model-card__desc {
+  font-size: 14px;
+  color: #86868b;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.model-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.model-card__tag {
+  font-size: 12px;
+  color: #6e6e73;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.model-card__requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 16px;
+}
+
+.model-card__req {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+}
+
+.model-card__req-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.model-card__quant {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5f5f7;
+}
+
+.model-card__vram {
+  font-size: 12px;
+  color: #6e6e73;
+}
+
+.model-card__overall {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.model-card__overall-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #86868b;
+}

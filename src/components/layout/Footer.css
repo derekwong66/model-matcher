@@ -1,0 +1,19 @@
+.footer {
+  padding: 48px 0 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 80px;
+}
+
+.footer__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #6e6e73;
+  font-size: 13px;
+  line-height: 1.5;
+  justify-content: center;
+}
+
+.footer__note p {
+  margin: 0;
+}
