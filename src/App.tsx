@@ -4,6 +4,7 @@ import { Footer } from "./components/layout/Footer.tsx";
 import { HardwareDashboard } from "./components/hardware/HardwareDashboard.tsx";
 import { FilterBar } from "./components/filters/FilterBar.tsx";
 import { ModelGrid } from "./components/models/ModelGrid.tsx";
+import { CarbonAd } from "./components/ads/CarbonAd.tsx";
 import { useHardware } from "./hooks/useHardware.ts";
 import { useHuggingFace } from "./hooks/useHuggingFace.ts";
 import { useModels } from "./hooks/useModels.ts";
@@ -88,6 +89,7 @@ function App() {
         {specs && (
           <HardwareDashboard specs={specs} onRefresh={refreshHardware} />
         )}
+        <CarbonAd />
         <FilterBar
           filter={modelManager.filter}
           families={modelManager.families}
