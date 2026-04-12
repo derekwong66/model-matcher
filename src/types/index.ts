@@ -1,6 +1,16 @@
 export type GPUVendor = "nvidia" | "amd" | "intel" | "apple" | "unknown";
 export type CompatibilityStatus = "optimal" | "slow" | "incompatible";
 export type VramConfidence = "high" | "medium" | "low";
+export type ModelInput = "text" | "text+image" | "text+image+audio";
+export type ModelScenario =
+  | "chat"
+  | "reasoning"
+  | "coding"
+  | "math"
+  | "multilingual"
+  | "vision"
+  | "creative"
+  | "edge";
 
 export interface HardwareSpecs {
   ram: number;
@@ -29,32 +39,11 @@ export interface LLMModel {
   tags: string[];
   requirements: ModelRequirement[];
   source: "ollama" | "static";
+  inputType: ModelInput;
+  scenarios: ModelScenario[];
   sizeBytes?: number;
   quantizationLevel?: string;
   modifiedAt?: string;
-}
-
-export interface OllamaModelDetail {
-  parent_model: string;
-  format: string;
-  family: string;
-  families: string[];
-  parameter_size: string;
-  quantization_level: string;
-}
-
-export interface OllamaModel {
-  name: string;
-  model: string;
-  modified_at: string;
-  size: number;
-  digest: string;
-  details: OllamaModelDetail;
-}
-
-export interface OllamaConnection {
-  status: "connected" | "disconnected" | "checking";
-  models: OllamaModel[];
 }
 
 export interface FilterState {
@@ -82,4 +71,21 @@ export const PARAM_RANGE_BOUNDS: Record<
   medium: { label: "7B - 13B", min: 7, max: 13 },
   large: { label: "13B - 33B", min: 13, max: 33 },
   xlarge: { label: "> 33B", min: 33, max: Infinity },
+};
+
+export const INPUT_LABELS: Record<ModelInput, string> = {
+  text: "Text",
+  "text+image": "Text + Image",
+  "text+image+audio": "Text + Image + Audio",
+};
+
+export const SCENARIO_LABELS: Record<ModelScenario, string> = {
+  chat: "Chat",
+  reasoning: "Reasoning",
+  coding: "Coding",
+  math: "Math",
+  multilingual: "Multilingual",
+  vision: "Vision",
+  creative: "Creative",
+  edge: "Edge / Lightweight",
 };

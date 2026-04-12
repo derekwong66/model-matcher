@@ -1,4 +1,9 @@
-import type { LLMModel, HardwareSpecs, CompatibilityStatus } from "../../types/index.ts";
+import type {
+  LLMModel,
+  HardwareSpecs,
+  CompatibilityStatus,
+} from "../../types/index.ts";
+import { INPUT_LABELS, SCENARIO_LABELS } from "../../types/index.ts";
 import { CompatibilityBadge } from "./CompatibilityBadge.tsx";
 import "./ModelCard.css";
 
@@ -32,6 +37,21 @@ export function ModelCard({ model, specs, compatStatus }: ModelCardProps) {
 
       <p className="model-card__desc">{model.description}</p>
 
+      <div className="model-card__meta">
+        <div className="model-card__meta-item">
+          <span className="model-card__meta-label">Input</span>
+          <span className="model-card__meta-value">
+            {INPUT_LABELS[model.inputType]}
+          </span>
+        </div>
+        <div className="model-card__meta-item">
+          <span className="model-card__meta-label">Use Cases</span>
+          <span className="model-card__meta-value">
+            {model.scenarios.map((s) => SCENARIO_LABELS[s]).join(" / ")}
+          </span>
+        </div>
+      </div>
+
       <div className="model-card__tags">
         {model.tags.map((tag) => (
           <span key={tag} className="model-card__tag">
@@ -42,7 +62,9 @@ export function ModelCard({ model, specs, compatStatus }: ModelCardProps) {
 
       <div className="model-card__requirements">
         {model.requirements.map((req, i) => {
-          const status = specs ? getSuitability(req.vram, specs) : "incompatible";
+          const status = specs
+            ? getSuitability(req.vram, specs)
+            : "incompatible";
           return (
             <div key={i} className="model-card__req">
               <div className="model-card__req-info">

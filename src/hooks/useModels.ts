@@ -68,7 +68,7 @@ const DEFAULT_FILTER: FilterState = {
   compatibilities: [],
   paramRanges: [],
   quantTypes: [],
-  sortBy: "name",
+  sortBy: "compatibility",
   sortDir: "asc",
 };
 

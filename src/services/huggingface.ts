@@ -1,4 +1,9 @@
-import type { LLMModel, ModelRequirement } from "../types/index.ts";
+import type {
+  LLMModel,
+  ModelRequirement,
+  ModelInput,
+  ModelScenario,
+} from "../types/index.ts";
 
 // Dev server proxies /api/hf → https://huggingface.co/api
 // Production uses direct URL
@@ -52,13 +57,57 @@ function extractFamily(modelId: string, tags: string[]): string {
   const lower = (modelId + " " + tags.join(" ")).toLowerCase();
   if (lower.includes("llama")) return "Llama";
   if (lower.includes("qwen")) return "Qwen";
-  if (lower.includes("mistral") || lower.includes("mixtral")) return "Mistral";
+  if (lower.includes("mistral") || lower.includes("mixtral") || lower.includes("codestral")) return "Mistral";
   if (lower.includes("gemma")) return "Gemma";
   if (lower.includes("phi")) return "Phi";
   if (lower.includes("deepseek")) return "DeepSeek";
-  if (lower.includes("yi")) return "Yi";
-  if (lower.includes("starcoder") || lower.includes("code")) return "Code";
+  if (lower.includes("chatglm") || lower.includes("glm-") || lower.includes("zhipu")) return "GLM";
+  if (lower.includes("baichuan")) return "Baichuan";
+  if (lower.includes("internlm")) return "InternLM";
+  if (lower.includes("moonshot") || lower.includes("kimi")) return "Kimi";
+  if (lower.includes("minimax")) return "MiniMax";
+  if (lower.includes("yi-") || lower.includes("01.ai")) return "Yi";
+  if (lower.includes("falcon")) return "Falcon";
+  if (lower.includes("command")) return "Command";
+  if (lower.includes("grok")) return "Grok";
+  if (lower.includes("nemotron")) return "Nemotron";
+  if (lower.includes("starcoder") || lower.includes("coder")) return "Code";
   return "Other";
+}
+
+function inferInputType(pipelineTag: string | null): ModelInput {
+  if (pipelineTag === "image-text-to-text") return "text+image";
+  return "text";
+}
+
+function inferScenarios(
+  family: string,
+  tags: string[],
+  pipelineTag: string | null,
+  paramNum: number
+): ModelScenario[] {
+  const scenarios: ModelScenario[] = [];
+  const lower = tags.join(" ").toLowerCase();
+
+  if (pipelineTag === "image-text-to-text" || lower.includes("vision")) scenarios.push("vision");
+  if (lower.includes("code") || lower.includes("coder")) scenarios.push("coding");
+  if (lower.includes("math")) scenarios.push("math");
+  if (lower.includes("reason") || lower.includes("r1")) scenarios.push("reasoning");
+  if (lower.includes("multilingual") || lower.includes("chinese") || lower.includes("bilingual")) {
+    scenarios.push("multilingual");
+  }
+  if (lower.includes("creative") || lower.includes("story")) scenarios.push("creative");
+
+  // Default scenarios based on family
+  if (scenarios.length === 0) {
+    scenarios.push("chat");
+    if (["DeepSeek", "Qwen", "Llama"].includes(family)) scenarios.push("reasoning");
+    if (["Qwen", "Code", "DeepSeek"].includes(family)) scenarios.push("coding");
+  }
+
+  if (paramNum <= 4) scenarios.push("edge");
+
+  return [...new Set(scenarios)].slice(0, 4);
 }
 
 function estimateVramFromQuant(paramSizeB: number, quant: string): number {
@@ -79,6 +128,8 @@ function hfModelToLLMModel(m: HFModel): LLMModel | null {
   const paramNum = parseFloat(paramSize);
   const family = extractFamily(m.id, m.tags);
   const shortName = m.id.split("/").pop() ?? m.id;
+  const inputType = inferInputType(m.pipeline_tag);
+  const scenarios = inferScenarios(family, m.tags, m.pipeline_tag, paramNum);
 
   // Collect available quantizations from GGUF filenames
   const quantSet = new Set<string>();
@@ -112,6 +163,8 @@ function hfModelToLLMModel(m: HFModel): LLMModel | null {
     tags,
     requirements,
     source: "static",
+    inputType,
+    scenarios,
   };
 }
 
@@ -123,7 +176,6 @@ function formatDownloads(n: number): string {
 
 export async function fetchHuggingFaceModels(): Promise<LLMModel[]> {
   try {
-    // Two requests: text-generation + image-text-to-text (multimodal like Gemma 4)
     const urls = [
       `${HF_API_BASE}?filter=gguf&sort=downloads&direction=-1&limit=30&pipeline_tag=text-generation`,
       `${HF_API_BASE}?filter=gguf&sort=downloads&direction=-1&limit=30&pipeline_tag=image-text-to-text`,
@@ -137,7 +189,6 @@ export async function fetchHuggingFaceModels(): Promise<LLMModel[]> {
       })
     );
 
-    // Merge and deduplicate by id
     const seen = new Set<string>();
     const merged: HFModel[] = [];
     for (const list of allResults) {
