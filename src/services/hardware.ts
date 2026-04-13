@@ -80,7 +80,16 @@ function identifyVendor(renderer: string): GPUVendor {
   ) {
     return "apple";
   }
-  if (lower.includes("nvidia") || lower.includes("geforce") || lower.includes("rtx") || lower.includes("gtx")) {
+  if (
+    lower.includes("nvidia") ||
+    lower.includes("geforce") ||
+    lower.includes("rtx") ||
+    lower.includes("gtx") ||
+    lower.includes("tegra") ||
+    lower.includes("jetson") ||
+    lower.includes("orin") ||
+    lower.includes("xavier")
+  ) {
     return "nvidia";
   }
   if (
@@ -107,6 +116,16 @@ function isAppleSilicon(renderer: string, vendor: string): boolean {
   );
 }
 
+function isJetson(renderer: string): boolean {
+  const lower = renderer.toLowerCase();
+  return (
+    lower.includes("tegra") ||
+    lower.includes("jetson") ||
+    lower.includes("orin") ||
+    lower.includes("xavier")
+  );
+}
+
 function estimateVramFromWebGPULimits(limits: GPULimits): {
   vram: number;
   confidence: VramConfidence;
@@ -121,26 +140,22 @@ function estimateVramFromWebGPULimits(limits: GPULimits): {
   };
 }
 
-function estimateAppleSiliconVram(
+function estimateUnifiedMemoryVram(
   ram: number,
-  limits: GPULimits | null
+  limits: GPULimits | null,
+  osReserve: number
 ): { vram: number; confidence: VramConfidence } {
   if (limits) {
-    // On Apple Silicon, the buffer limit is typically closer to total unified memory
-    // but we need to estimate the portion available for GPU work
     const fromLimits = estimateVramFromWebGPULimits(limits);
-    // Apple Silicon uses unified memory, typically OS reserves 4-8GB
-    const fromRam = ram - 6;
-    // Use the more conservative estimate
+    const fromRam = ram - osReserve;
     const vram = Math.min(fromLimits.vram, fromRam);
     return {
       vram: Math.max(Math.round(vram * 10) / 10, 2),
       confidence: "medium",
     };
   }
-  // Fallback: rough estimate with low confidence
   return {
-    vram: Math.round((ram * 0.7) * 10) / 10,
+    vram: Math.max(Math.round((ram - osReserve) * 10) / 10, 2),
     confidence: "low",
   };
 }
@@ -184,13 +199,27 @@ export async function getHardwareSpecs(): Promise<HardwareSpecs> {
 
   const gpuVendor = identifyVendor(renderer);
   const appleSilicon = isAppleSilicon(renderer, vendorStr);
+  const jetson = isJetson(renderer);
   const gpuModel = extractGpuModel(renderer);
 
   let vramEstimate = 0;
   let vramConfidence: VramConfidence = "low";
 
-  if (appleSilicon) {
-    const result = estimateAppleSiliconVram(ram, limits);
+  // Jetson: unified memory like Apple Silicon, OS reserves ~4GB
+  if (jetson) {
+    const dbEntry = lookupGpu(renderer);
+    if (dbEntry && dbEntry.vram > 0) {
+      // Known Jetson model in database — but still cap by actual RAM
+      vramEstimate = Math.min(dbEntry.vram, ram);
+      vramConfidence = "high";
+    } else {
+      // Generic Tegra / unknown Jetson — use unified memory estimate
+      const result = estimateUnifiedMemoryVram(ram, limits, 4);
+      vramEstimate = result.vram;
+      vramConfidence = result.confidence;
+    }
+  } else if (appleSilicon) {
+    const result = estimateUnifiedMemoryVram(ram, limits, 6);
     vramEstimate = result.vram;
     vramConfidence = result.confidence;
   } else {
@@ -219,6 +248,7 @@ export async function getHardwareSpecs(): Promise<HardwareSpecs> {
     vramEstimate,
     vramConfidence,
     isAppleSilicon: appleSilicon,
+    isJetson: jetson,
     webgpuAvailable,
   };
 }

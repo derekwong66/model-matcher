@@ -49,8 +49,8 @@ export function HardwareDashboard({
           label="VRAM Estimate"
           value={`${specs.vramEstimate.toFixed(1)} GB`}
           subtext={
-            specs.isAppleSilicon
-              ? "Unified Memory"
+            specs.isAppleSilicon || specs.isJetson
+              ? "Unified Memory (shared with RAM)"
               : `GPU Memory (${specs.vramConfidence} confidence)`
           }
           icon="gpu"

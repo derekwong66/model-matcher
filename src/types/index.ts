@@ -21,6 +21,7 @@ export interface HardwareSpecs {
   vramEstimate: number;
   vramConfidence: VramConfidence;
   isAppleSilicon: boolean;
+  isJetson: boolean;
   webgpuAvailable: boolean;
 }
 

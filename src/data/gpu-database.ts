@@ -76,6 +76,16 @@ const GPU_DATABASE: GpuEntry[] = [
   { patterns: ["arc a380", "intel arc a380"], vram: 6, vendor: "intel" },
   { patterns: ["arc b580", "intel arc b580"], vram: 12, vendor: "intel" },
   { patterns: ["arc b570", "intel arc b570"], vram: 10, vendor: "intel" },
+
+  // NVIDIA Jetson (unified memory — VRAM = system RAM)
+  { patterns: ["jetson orin agx", "orin agx"], vram: 32, vendor: "nvidia" },
+  { patterns: ["jetson agx orin"], vram: 32, vendor: "nvidia" },
+  { patterns: ["jetson orin nx", "orin nx"], vram: 16, vendor: "nvidia" },
+  { patterns: ["jetson orin nano", "orin nano"], vram: 8, vendor: "nvidia" },
+  { patterns: ["jetson xavier nx", "xavier nx"], vram: 8, vendor: "nvidia" },
+  { patterns: ["jetson agx xavier", "xavier agx"], vram: 32, vendor: "nvidia" },
+  { patterns: ["jetson nano"], vram: 4, vendor: "nvidia" },
+  { patterns: ["tegra"], vram: 0, vendor: "nvidia" }, // generic Tegra fallback
 ];
 
 export function lookupGpu(renderer: string): GpuEntry | null {
